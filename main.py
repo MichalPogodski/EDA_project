@@ -51,15 +51,41 @@ def task_4():
     res.loc[res['sex'] == 'M', "frequency_female"] = 0
     df = res
     print(df)
+    # df.to_csv("task_4.csv")
 
 
+def task_5():
+    df_temp_num = df.groupby(['year']).sum()
+    print("df_temp_num: \n", df_temp_num)
+    df_temp_sex_num = df.groupby(['sex', 'year']).sum()
+    # print("df_temp_sex_num: \n", df_temp_sex_num)
 
+    df_temp_num['div'] = df_temp_sex_num['number']['F'] / df_temp_sex_num['number']['M']
+    male_max = max(df_temp_sex_num['number']['M'])
+    print(male_max)
+    ax = df_temp_num.plot(kind='line', subplots=True)
+    plt.show()
+#########################################################wyczysc wykres + maksy (dokoncz polecenie)################
+
+
+def task_6():
+    df_temp = df.groupby(['year', 'sex', 'name']).sum()
+    df_temp.sort_values("number", axis=0, inplace=True, ascending=False)
+    df_temp = df_temp.head(1000)
+    print('df_temp: \n', df_temp)
+    df_top = df_temp.groupby(['sex', 'name']).sum()
+    df_top.sort_values("number", axis=0, inplace=True, ascending=False)
+    print('df_top: \n', df_top)
+
+def task_7():
+    
 
 if __name__ == '__main__':
     read_data()
     # task_2()
     # task_3()
-    task_4()
-
-
+    # task_4()
+    # task_5()   #########################################################wyczysc wykres + maksy (dokoncz polecenie)################
+    # task_6()
+    task_7()
 
