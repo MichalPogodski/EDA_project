@@ -79,7 +79,20 @@ def task_5():
 
 def task_6():
     print('ZADANIE 6:')
+    df_temp = df.sort_values(['sex', 'number'], ascending=[False, False])
+    df_res = df_temp.groupby(['year', 'sex']).head(1000)
 
+    df_res1 = df_res.groupby(['sex', 'name']).sum()
+    df_res2 = df_res1.sort_values(['sex', 'number'], ascending=[False, False])
+    df_top = df_res2.groupby('sex').head(1000)
+    del df_top['year']
+
+    print(df_top)
+
+    df_8 = pd.merge(df_temp, df_top, how='inner', on=['name'])
+    del df_8['number_y']
+    df_8.rename(columns={'number_x': 'number'}, inplace=True)
+    return df_8
 
 
 
@@ -112,12 +125,24 @@ def task_7():#uzupelnij Marilin , danePobierzZPoprzedniegoAleDodajKOmentarzDoWyw
 
 
 def task_8(top1000):
-    print('ZADANIE 8:')
-    df_temp = df.groupby(['year', 'sex']).sum()
-    print(df_temp)
+    print('ZADANIE 8: wykres')
+    all_names = df.groupby(['year', 'sex']).nunique()
+    del all_names['number']
+    top_names = top1000.groupby(['year', 'sex']).nunique()
+    del top_names['number']
 
-    df_8 = pd.merge(df, top1000, how='inner', on=['name'])
-    print(df_8, '\n')
+    df_merged = pd.merge(all_names, top_names, how='inner', on=['year', 'sex'])
+    df_merged['top / all'] = df_merged['name_y'] / df_merged['name_x'] * 100
+
+    df_res = pd.pivot_table(df_merged, values='top / all', columns='sex', index='year', aggfunc=np.sum)
+    ax = df_res.plot(title='ZADANIE 8')
+    ax.set_ylabel('procentowy udział imion z rankingu top1000')
+    ax.set_xlabel('lata')
+    ax.legend(["Kobiety", "Mezczyzni"])
+
+    df_res['diff'] = abs(df_res['M'] - df_res['F'])
+    print('Najwieksza roznice w roznorodnosci pomiedzy imionami zenskimi a meskimi zanotowano w ',
+          df_res.sort_values('diff', ascending=False).head(1).index.values[0], 'roku.')
 
 
 
@@ -233,9 +258,9 @@ if __name__ == '__main__':
     # task_3()
     # task_4()
     # task_5()
-    # # top1000 = task_6() ################## 1
+    # top1000 = task_6()
     # task_7()
-    # task_8(top1000) # korzysta z obliczen z task_6() ############### 2
+    # task_8(top1000) # korzysta z obliczen z task_6()
     # task_9()
     # task_10()
     # # task_11() #################### 3
@@ -246,7 +271,10 @@ if __name__ == '__main__':
     plt.show()
 
     #8###################### ZAD 7
+    ######################### uładnij wszystkie wykresy!
     #7###################### cos z funkcji do innej funkcji??
     #6###################### 13-15 zakres lat w jednej linijce
     #5###################### pusc wszystkie na raz, ogar zachowania
     #4###################### skontroluj czy wszystko z polecen
+    # WYCZYSC I OBKOMENTUJ
+    #instalacje pod labki
