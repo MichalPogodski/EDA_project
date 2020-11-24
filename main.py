@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 import sqlite3
 
@@ -76,34 +77,37 @@ def task_5():
 
 
 
-def task_6():           #########################
+def task_6():
     print('ZADANIE 6:')
 
 
 
 
-def task_7():#legenda, wyczyscWykresy, uzupelnij Marilin , danePobierzZPoprzedniegoAleDodajKOmentarzDoWywolania
+def task_7():#uzupelnij Marilin , danePobierzZPoprzedniegoAleDodajKOmentarzDoWywolania
     print('ZADANIE 7: wykres')
     df_temp = df.groupby(['name', 'year']).sum()
-    df_temp.sort_values("year", axis=0, inplace=True, ascending=True)
+    fig, ax0 = plt.subplots()
+    ax1 = ax0.twinx()
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
+    ax0.set_ylabel('number (lines)')
+    ax1.set_ylabel('popularity (dots)')
     fig.suptitle('ZADANIE 7')
 
-    df_temp['number']['Harry'].plot(ax=axes[0])
-    df_temp['number']['Marilin'].plot(ax=axes[0])
-    df_temp['number']['James'].plot(ax=axes[0])
-    df_temp['number']['Mary'].plot(ax=axes[0])
+    df_temp['number']['Harry'].plot(ax=ax0, color='tab:red', label='Harry')
+    df_temp['number']['Marilin'].plot(ax=ax0, color='tab:purple', label='Marilin')
+    df_temp['number']['James'].plot(ax=ax0, color='tab:blue', label='James')
+    df_temp['number']['Mary'].plot(ax=ax0, color='tab:green', label='Mary')
+    ax0.legend()
 
     df_temp2 = df.groupby(['sex', 'year']).sum()
     fam1 = df_temp['number']['Harry'] / df_temp2['number']['M']
-    fam1.plot(ax=axes[1])
+    fam1.plot(ax=ax1, color='tab:red', marker='o')
     fam2 = df_temp['number']['Marilin'] / df_temp2['number']['F']
-    fam2.plot(ax=axes[1])
+    fam2.plot(ax=ax1, color='tab:purple', marker='o')
     fam3 = df_temp['number']['James'] / df_temp2['number']['M']
-    fam3.plot(ax=axes[1])
+    fam3.plot(ax=ax1, color='tab:blue', marker='o')
     fam4 = df_temp['number']['Mary'] / df_temp2['number']['F']
-    fam4.plot(ax=axes[1])
+    fam4.plot(ax=ax1, color='tab:green', marker='o')
 
 
 
@@ -119,18 +123,33 @@ def task_8(top1000):
 
 def task_9():
     print('ZADANIE 9: wykres')
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    fig.suptitle('ZADANIE 9')
     df_temp = df
     last_letter = list(df_temp['name'])
     for i, elem in enumerate(last_letter): last_letter[i] = elem[-1]
     df_temp['last_letter'] = last_letter
+    df_backup = df_temp.groupby(['last_letter', 'year']).sum()
     df_temp = df_temp.groupby(['last_letter', 'year', 'sex']).sum()
     df_temp = df_temp.loc[:, [1910, 1960, 2015], :]
     df_divisor = df.groupby('year').sum()
     df_temp['number'] /= df_divisor['number']
     df_temp = df_temp.loc[:, :, 'M']
-    df_res = df_temp['number']
-    ax = df_res.plot.bar(title='ZADANIE 9')
+    df_res = pd.pivot_table(df_temp, values='number', index='last_letter',
+                    columns='year', aggfunc=np.sum)
 
+    ax = df_res.plot.bar(ax=axes[0])
+
+    df_res['diff'] = abs(df_res[1910] - df_res[2015])
+    df_res.sort_values(['diff'], inplace=True, ascending=False)
+    print('Najwieksza roznica miedzy rokiem 1910 a 2015 wystapila dla litery : ', df_res.head(1).index.values[0])
+
+    letters = df_res.head(3).index.values
+    df_res2 = df_backup.loc[letters]
+    df_res3 = pd.pivot_table(df_res2, values='number', columns='last_letter',
+                            index='year', aggfunc=np.sum)
+
+    df_res3.plot(ax=axes[1])
 
 
 def task_10():
@@ -169,7 +188,6 @@ def task_11():
     # print(res2000)
 
     res = pd.merge(res1920, res2000, how='inner', on=['name'])
-    # print(res[['1880-1920 factor', '2000-2020 factor']])
     res['difference'] = res['2000-2020 factor'] - res['1880-1920 factor']
     print(res[['1880-1920 factor', '2000-2020 factor', 'difference']].sort_values('difference'), '\n')
 
@@ -180,7 +198,6 @@ def task_12():
     print('ZADANIE 12:')
     global df2
     conn = sqlite3.connect("USA_ltper_1x1.sqlite")
-    # c = conn.cursor()
     df0 = pd.read_sql_query('SELECT Sex, Year, Age, mx, qx, ax, lx, dx, LLx, Tx, ex FROM USA_fltper_1x1 ORDER BY Year ASC', conn)
     df1 = pd.read_sql_query('SELECT Sex, Year, Age, mx, qx, ax, lx, dx, LLx, Tx, ex FROM USA_mltper_1x1 ORDER BY Year ASC', conn)
     conn.close()
@@ -216,18 +233,20 @@ if __name__ == '__main__':
     # task_3()
     # task_4()
     # task_5()
-    # # top1000 = task_6() ################## 3
-    task_7()  ###################### 1
-    # task_8(top1000) # korzysta z obliczen z task_6() ############### 4
-    # task_9() ####################### 2
+    # # top1000 = task_6() ################## 1
+    # task_7()
+    # task_8(top1000) # korzysta z obliczen z task_6() ############### 2
+    # task_9()
     # task_10()
-    # # task_11() #################### 5
+    # # task_11() #################### 3
     # task_12()
     # task_13()
     # task_14()
-    # task_15() ################# 6
+    # task_15() ################# 9
     plt.show()
-    
-    ####################### cos z funkcji do innej funkcji??
-    ####################### 13-15 zakres lat w jednej linijce
-    ####################### pusc wszystkie na raz, ogar zachowania
+
+    #8###################### ZAD 7
+    #7###################### cos z funkcji do innej funkcji??
+    #6###################### 13-15 zakres lat w jednej linijce
+    #5###################### pusc wszystkie na raz, ogar zachowania
+    #4###################### skontroluj czy wszystko z polecen
