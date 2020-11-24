@@ -73,7 +73,7 @@ def task_5():
     df_temp_num.rename(columns=rename_dict, inplace=True)
 
     df_res = df_temp_num[['number of births', 'sex factor in births']]
-    ax = df_res.plot(kind='line', subplots=True, title='ZADANIE 5')
+    ax = df_res.plot(kind='line', subplots=True, title='TASK 5')
 
 
 
@@ -99,7 +99,7 @@ def task_6():
     return df_8, name1, name2
 
 
-def task_7(name1, name2):#uzupelnij Marilin , danePobierzZPoprzedniegoAleDodajKOmentarzDoWywolania
+def task_7(name1, name2):
     print('ZADANIE 7: wykres')
 
     df_temp_piv = pd.pivot_table(df, values='number', columns='year', index='name', fill_value=0, aggfunc=np.sum)
@@ -108,7 +108,7 @@ def task_7(name1, name2):#uzupelnij Marilin , danePobierzZPoprzedniegoAleDodajKO
 
     ax0.set_ylabel('number (lines)')
     ax1.set_ylabel('popularity (dots)')
-    fig.suptitle('ZADANIE 7')
+    fig.suptitle('TAKS 7')
     df_temp_piv.loc['Harry'].plot(ax=ax0, color='tab:red', label='Harry')
     df_temp_piv.loc['Marilin'].plot(ax=ax0, color='tab:purple', label='Marilin')
     df_temp_piv.loc[name1].plot(ax=ax0, color='tab:blue', label=name1)
@@ -138,10 +138,10 @@ def task_8(top1000):
     df_merged['top / all'] = df_merged['name_y'] / df_merged['name_x'] * 100
 
     df_res = pd.pivot_table(df_merged, values='top / all', columns='sex', index='year', aggfunc=np.sum)
-    ax = df_res.plot(title='ZADANIE 8')
-    ax.set_ylabel('procentowy udział imion z rankingu top1000')
-    ax.set_xlabel('lata')
-    ax.legend(["Kobiety", "Mezczyzni"])
+    ax = df_res.plot(title='TASK 8')
+    ax.set_ylabel('Contents from top1000 [%]')
+    ax.set_xlabel('year')
+    ax.legend(["Female", "Male"])
 
     df_res['diff'] = abs(df_res['M'] - df_res['F'])
     print('Najwieksza roznice w roznorodnosci pomiedzy imionami zenskimi a meskimi zanotowano w ',
@@ -152,7 +152,7 @@ def task_8(top1000):
 def task_9():
     print('ZADANIE 9: wykres')
     fig, axes = plt.subplots(nrows=1, ncols=2)
-    fig.suptitle('ZADANIE 9')
+    fig.suptitle('TASK 9')
     df_temp = df
     last_letter = list(df_temp['name'])
     for i, elem in enumerate(last_letter): last_letter[i] = elem[-1]
@@ -202,8 +202,6 @@ def task_11(unisex):
     df_temp = df[unisex]
     # print(df_temp)
 
-
-
     # df_temp = pd.merge(df, df_unisex, how='inner', on=['name'])
     # df_temp.drop(['frequency_male_y', 'frequency_female_y', 'sex_y', 'number_y', 'year_y'], inplace=True, axis=1)
     # df_temp['popularity']
@@ -226,11 +224,9 @@ def task_12():
 def task_13():
     print('ZADANIE 13: wykres')
     df_temp = df2.groupby('Year').sum()
-
-    df_born = df.loc[df['year'] >= 1959]
-    df_born = df_born.loc[df_born['year'] <= 2017].groupby('year').sum()
+    df_born = df.loc[(df['year'] >= 1959) & (df['year'] <= 2017)].groupby('year').sum()
     df_temp['natural_increase'] = df_born['number'].values - df_temp['dx'].values # przyrost naturalny
-    ax = df_temp.plot(kind='line', y='natural_increase', title='ZADANIE 13')
+    ax = df_temp.plot(kind='line', y='natural_increase', title='TASK 13')
 
 
 
@@ -238,10 +234,9 @@ def task_14():
     print('ZADANIE 14: wykres')
     df_temp = df2.groupby(['Age', 'Year']).sum()
     df_temp2 = df2.groupby('Year').sum()
-    df_born = df.loc[df['year'] >= 1959]
-    df_born = df_born.loc[df_born['year'] <= 2017].groupby('year').sum()
+    df_born = df.loc[(df['year'] >= 1959) & (df['year'] <= 2017)].groupby('year').sum()
     df_temp2['survivors0_factor'] = (df_born['number'].values - df_temp.loc[0, :]['dx'].values) / df_born['number'].values
-    ax = df_temp2.plot(kind='line', y='survivors0_factor', title='ZADANIE 14')
+    ax = df_temp2.plot(kind='line', y='survivors0_factor', title='TASK 14')
 
 
 
@@ -254,30 +249,25 @@ def task_15():
 
 if __name__ == '__main__':
     task_1()
-    # task_2()
-    # task_3()
-    # task_4()
-    # task_5()
+    task_2()
+    task_3()
+    task_4()
+    task_5()
     top1000, name1, name2 = task_6()
-    task_7(name1, name2) # korzysta z obliczen z task_6()
-    # task_8(top1000) # korzysta z obliczen z task_6()
-    # task_9()
-    # unisex = task_10()
-    # task_11(unisex) # korzysta z obliczen z task_10()
-    # task_12()
-    # task_13()
-    # task_14()
+    task_7(name1, name2)            # korzysta z obliczen z task_6()
+    task_8(top1000)                 # korzysta z obliczen z task_6()
+    task_9()
+    unisex = task_10()
+    # task_11(unisex)                 # korzysta z obliczen z task_10()
+    task_12()
+    task_13()
+    task_14()
     # task_15()
     plt.show()
 
-    #8###################### ZAD 7
-    ######################### uładnij wszystkie wykresy!
-    #7###################### cos z funkcji do innej funkcji??
-    #6###################### 13-15 zakres lat w jednej linijce
-    #5###################### pusc wszystkie na raz, ogar zachowania
-    #4###################### skontroluj czy wszystko z polecen
+    # task11
+    # task15
+    # skontroluj czy wszystko z polecen
     # WYCZYSC I OBKOMENTUJ
-    # instalacje pod labki
-    #task11
-    #task15
+
 
