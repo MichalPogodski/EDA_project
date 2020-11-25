@@ -7,6 +7,7 @@ import sqlite3
 df = pd.DataFrame()
 df2 = pd.DataFrame()
 
+
 def task_1():
     print('ZADANIE 1:')
     global df
@@ -25,10 +26,12 @@ def task_1():
 
 
 
+
 def task_2():
     print('ZADANIE 2:')
     table_temp = df.nunique(axis=0)
     print('liczba unikalnych imion: ', table_temp['name'], '\n')
+
 
 
 
@@ -37,6 +40,7 @@ def task_3():
     table_temp = df.groupby('sex').nunique()
     print('liczba unikalnych imion zenskich: ', table_temp['name']['F'])
     print('liczba unikalnych imion meskich: ', table_temp['name']['M'], '\n')
+
 
 
 
@@ -57,16 +61,17 @@ def task_4():
 
 
 
+
 def task_5():
     print('ZADANIE 5:')
     df_temp_num = df.groupby(['year']).sum()
     df_temp_sex_num = df.groupby(['sex', 'year']).sum()
     df_temp_num['div'] = df_temp_sex_num['number']['F'] / df_temp_sex_num['number']['M']
-    df_temp_num['diff'] = abs(df_temp_sex_num['number']['F'] - df_temp_sex_num['number']['M'])
+    df_temp_num['div_diff'] = abs(df_temp_num['div'] - 1)
     print('Najwieksza roznice w liczbie urodzen miedzy chlopcami a dziewczynkami  zanotowano w ',
-          df_temp_num.sort_values('div', ascending=False).head(1).index.values[0],
+          df_temp_num.sort_values('div_diff', ascending=False).head(1).index.values[0],
           'roku. Najmniejsza w ',
-          df_temp_num.sort_values('diff', ascending=True).head(1).index.values[0],
+          df_temp_num.sort_values('div_diff', ascending=True).head(1).index.values[0],
           'roku. \n')
 
     rename_dict = {'number': 'number of births', 'div': 'sex factor in births'}
@@ -74,6 +79,8 @@ def task_5():
 
     df_res = df_temp_num[['number of births', 'sex factor in births']]
     ax = df_res.plot(kind='line', subplots=True, title='TASK 5')
+    print('\n')
+
 
 
 
@@ -97,6 +104,9 @@ def task_6():
     name2 = df_res1.sort_values(['sex', 'number'], ascending=[True, False]).head(1).index.values[0][1]
 
     return df_8, name1, name2
+    print('\n')
+
+
 
 
 def task_7(name1, name2):
@@ -125,6 +135,17 @@ def task_7(name1, name2):
     fam4 = df_temp_piv.loc[name2] / df_temp2['number']['F']
     fam4.plot(ax=ax1, color='tab:green', marker='o')
 
+    l1 = ['Harry', 'Marilin', name1, name2]
+    l2 = [1940, 1980, 2019]
+    df_names = pd.DataFrame(index=l1, columns=l2)
+    for i in l1:
+        for j in l2:
+            df_names[j][i] = df_temp_piv[j][i]
+
+    print("Ilosc nadania imion w konkretnych latach: \n", df_names)
+    print('\n')
+
+
 
 
 def task_8(top1000):
@@ -146,6 +167,8 @@ def task_8(top1000):
     df_res['diff'] = abs(df_res['M'] - df_res['F'])
     print('Najwieksza roznice w roznorodnosci pomiedzy imionami zenskimi a meskimi zanotowano w ',
           df_res.sort_values('diff', ascending=False).head(1).index.values[0], 'roku.')
+    print('\n')
+
 
 
 
@@ -153,7 +176,7 @@ def task_9():
     print('ZADANIE 9: wykres')
     fig, axes = plt.subplots(nrows=1, ncols=2)
     fig.suptitle('TASK 9')
-    df_temp = df
+    df_temp = df.copy()
     last_letter = list(df_temp['name'])
     for i, elem in enumerate(last_letter): last_letter[i] = elem[-1]
     df_temp['last_letter'] = last_letter
@@ -178,11 +201,14 @@ def task_9():
                             index='year', aggfunc=np.sum)
 
     df_res3.plot(ax=axes[1])
+    print('\n')
+
+
 
 
 def task_10():
     print('ZADANIE 10:')
-    df_temp = df.groupby('name').nunique()
+    df_temp = df.groupby(['name']).nunique()
     df_unisex_names = df_temp.loc[df_temp['sex'] == 2]
     unisex_names = (list(df_unisex_names.index))    #lista imion nadawanych kobietom i mezczyznom
 
@@ -192,20 +218,37 @@ def task_10():
 
     print('najpopularniejsze imie meksie: \n', list(df_res.loc['M'].head(1).index)[0])
     print('najpopularniejsze imie zenskie: \n', list(df_res.loc['F'].head(1).index)[0], '\n')
-    return unisex_names
 
 
-def task_11(unisex):
+
+
+def task_11():
     print('ZADANIE 11:')
-    print(df, unisex)
-    df_temp = df.groupby(['name', 'year']).sum()
-    df_temp = df[unisex]
-    # print(df_temp)
+    # nie pobralem wartosci z task_10, poniewaz przy pogrupowaniu po 'name' oraz 'year'
+    # zawieszaly sie obliczenia przy szukaniu najpopularniejszych imion (w task_10)
+    df_uni_temp = df.groupby(['name', 'year']).nunique()
+    df_unisex = df_uni_temp.loc[df_uni_temp['sex'] == 2]
+    df_temp0 = df.groupby(['name', 'year']).sum()
 
-    # df_temp = pd.merge(df, df_unisex, how='inner', on=['name'])
-    # df_temp.drop(['frequency_male_y', 'frequency_female_y', 'sex_y', 'number_y', 'year_y'], inplace=True, axis=1)
-    # df_temp['popularity']
-    # print(df_temp)
+    df_temp = pd.merge(df_temp0, df_unisex, how='inner', on=['name', 'year'])
+    df_temp['popularity'] = df_temp['frequency_male_x'] / (df_temp['frequency_male_x'] + df_temp['frequency_female_x'])
+    df_temp.drop(['frequency_male_y', 'frequency_female_y', 'number_y', 'number_x',
+                  'sex', 'frequency_male_x', 'frequency_female_x'], inplace=True, axis=1)
+
+    df_res = pd.pivot_table(df_temp, columns='year', index='name', fill_value=0, aggfunc=np.sum)
+    df_res['1880 - 1920'] = df_res.iloc[:, 0:41].sum(axis=1) / 41
+    df_res['2000 - 2020'] = df_res.iloc[:, -20:].sum(axis=1) / 20
+
+    df_pop = df_res[['1880 - 1920', '2000 - 2020']].copy()
+    df_pop['diff'] = abs(df_res['1880 - 1920'] - df_res['2000 - 2020'])
+    df_11 = df_pop.sort_values('diff', ascending=False).head(2)
+
+    df_plottin_temp = pd.merge(df_temp.loc[df_11.index.values[0]], df_temp.loc[df_11.index.values[1]], how='inner', on=['year'])
+    df_plottin = df_plottin_temp[["popularity_x", "popularity_y"]]
+    df_plottin.rename(columns={"popularity_x": df_11.index.values[0]+'_popularity',
+                    "popularity_y": df_11.index.values[1]+'_popularity'}, inplace=True)
+    df_plottin.plot(title='TASK 11')
+    print('\n')
 
 
 
@@ -221,12 +264,16 @@ def task_12():
     print(df2, '\n')
 
 
+
+
 def task_13():
     print('ZADANIE 13: wykres')
     df_temp = df2.groupby('Year').sum()
     df_born = df.loc[(df['year'] >= 1959) & (df['year'] <= 2017)].groupby('year').sum()
     df_temp['natural_increase'] = df_born['number'].values - df_temp['dx'].values # przyrost naturalny
-    ax = df_temp.plot(kind='line', y='natural_increase', title='TASK 13')
+    df_temp.plot(kind='line', y='natural_increase', title='TASK 13')
+    print('\n')
+
 
 
 
@@ -236,14 +283,21 @@ def task_14():
     df_temp2 = df2.groupby('Year').sum()
     df_born = df.loc[(df['year'] >= 1959) & (df['year'] <= 2017)].groupby('year').sum()
     df_temp2['survivors0_factor'] = (df_born['number'].values - df_temp.loc[0, :]['dx'].values) / df_born['number'].values
-    ax = df_temp2.plot(kind='line', y='survivors0_factor', title='TASK 14')
+    df_temp2.plot(kind='line', y='survivors0_factor', title='TASK 14')
+    return df_temp2, df_temp, df_born
+    print('\n')
 
 
 
-def task_15():
+def task_15(df_14, df_temp, df_born):
     print('ZADANIE 15: wykres')
+    df_14['survivors0-5_factor_pom'] = 0
+    for i in range(5):
+        df_14['survivors0-5_factor_pom'] = df_14['survivors0-5_factor_pom'] +  df_temp.loc[i, :]['dx'].values
 
-
+    df_14['survivors0-5_factor'] = (df_born['number'].values - df_14['survivors0-5_factor_pom']) / df_born['number'].values
+    df_14.plot(kind='line', y=['survivors0-5_factor', 'survivors0_factor'], title='TASK 15')
+    print('\n')
 
 
 
@@ -254,20 +308,18 @@ if __name__ == '__main__':
     task_4()
     task_5()
     top1000, name1, name2 = task_6()
-    task_7(name1, name2)            # korzysta z obliczen z task_6()
-    task_8(top1000)                 # korzysta z obliczen z task_6()
+    task_7(name1, name2)                # korzysta z obliczen z task_6()
+    task_8(top1000)                     # korzysta z obliczen z task_6()
     task_9()
-    unisex = task_10()
-    # task_11(unisex)                 # korzysta z obliczen z task_10()
+    task_10()
+    task_11()
     task_12()
     task_13()
-    task_14()
-    # task_15()
+    df_14, df_temp, df_born = task_14()
+    task_15(df_14, df_temp, df_born)    # korzysta z obliczen z task_14()
     plt.show()
 
-    # task11
-    # task15
-    # skontroluj czy wszystko z polecen
-    # WYCZYSC I OBKOMENTUJ
+
+
 
 
