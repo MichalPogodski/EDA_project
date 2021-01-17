@@ -12,4 +12,4 @@ It contains frequency of names and mortality of USA population through 1880-2019
 ![alt text](result_images/last_letters.png?raw=true)
 
 * Number of distinct names occurence over the years .
-![alt text](result_images/cases_and_popularity?raw=true)
+![alt text](result_images/cases_and_popularity.png?raw=true)
